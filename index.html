@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Story</title>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .option {
+            color: #1e90ff;
+            cursor: pointer;
+            display: block;
+            margin: 10px 0;
+            text-decoration: underline;
+        }
+        .option:hover {
+            color: #87ceeb;
+        }
+    </style>
+</head>
+<body>
+    <div id="story-text"></div>
+    <div id="options"></div>
+
+    <script>
+        // Pocky狀態
+        let hasPocky = false;
+        
+        // 使用編號定義場景
+        const scenes = {
+            1: {
+                text: "【光棍節?Pocky Day?】",
+                options: [
+                    { text: "開始", nextScene: 2 }
+                ],
+                onEnter: () => {
+                    hasPocky = false; // 重置 Pocky 狀態
+                }
+            },
+            2: {
+                text: "<p>妳正待在宅邸街，孤兒院就在這條街上，街上到處都是外觀相似的小房子。</p><p>峭壁街今天似乎在舉辦什麼活動。</p><p>妳決定:</p>",
+                options: [
+                    { 
+                    text: "回到孤兒院", 
+                        nextScene: 0 // 初始化為 0，會動態更新
+                    },
+                    { 
+                        text: "前往倒鉤街", 
+                        nextScene: 7 
+                    }
+                ],
+                onEnter: () => {
+                    // 根據 hasPocky 狀態來動態更新回到孤兒院的場景選項
+                    const options = document.getElementById('options').children;
+                    options[0].onclick = () => loadScene(hasPocky ? 9 : 3); // 動態決定進入場景
+                }
+            },
+            3: {
+                text: "<p>「佩爾!」是羅賓。「今天峭壁街似乎有巧克力免費供應!」羅賓興奮地對妳說，隨後又變得愁眉苦臉。</p><p>「好久沒有吃到巧克力了......那個活動僅限女生領取，所以......」羅賓期待地看著妳，「可以麻煩妳帶一點回來嗎?」</p>",
+                options: [
+                    { text: "答應", nextScene: 4 },
+                    { text: "拒絕", nextScene: 5 }
+                ]
+            },
+            4: {
+                text: "「太好了!」羅賓給妳了一個大大的擁抱，「那我在這裡期待妳回來!」",
+                options: [
+                    { text: "出發", nextScene: 2 }
+                ]
+            },
+            5: {
+                text: "「好、好吧......」羅賓看起來有點失落，「抱歉，也許妳今天心情不好......要喝點熱可可嗎?」",
+                options: [
+                    { text: "喝熱可可", nextScene: 6 }
+                ]
+            },
+            6: {
+                text: "你們一起享用了熱可可，度過了一個愉快的下午。",
+                options: [
+                    { text: "回到標題", nextScene: 1 }
+                ]
+            },
+            7: {
+                text: "妳正站在倒鉤街的街道上。也許是因為活動的關係，倒鉤街充斥著愉快的氛圍。",
+                options: [
+                    { text: "前往峭壁街", nextScene: 8 },
+                    { text: "返回宅邸街", nextScene: 2 }
+                ]
+            },
+            8: {
+                text: "<p>妳獲得了 Pocky!</p>", // 顯示Pocky獲得
+                options: [
+                    { text: "返回倒鉤街", nextScene: 7 }, // 回到倒鉤街
+                    { text: "回到孤兒院", nextScene: 9 }  // 直接回到孤兒院
+                ],
+                onEnter: () => {
+                    hasPocky = true; // 獲得Pocky，設置為true
+                }
+            },
+            9: {
+                text: `<p>「佩爾!」羅賓給妳了一個大大的擁抱，「歡迎回來!」${hasPocky ? '妳們一起分享了 Pocky。' : ''}</p>`,
+                options: [
+                    { text: "分享pocky", nextScene: 10 }
+                ],
+            },
+            10: {
+                text: "<p>你們一起享用了熱可可與pocky，度過了一個愉快的下午。</p><p>就算不是戀人還是可以一起吃pocky，對吧?</p>",
+                options: [
+                    { text: "繼續", nextScene: 11 }
+                ]
+            },
+            11: {
+                text: "<p>妳把剩下的pocky分送給孤兒院的孩子們，孤兒院充斥著快樂的笑聲。</p><p>「聽說......聽說這次的活動是貝利出資的。」一個孤兒說道。</p><p>「怎麼可能!難道......她良心發現了?」另一個孤兒說道。</p>",
+                options: [
+                    { text: "追根究柢(前往貝利辦公室)", nextScene: 12 },
+                    { text: "別管那麼多", nextScene: 16 }
+                ]
+            },
+            12: {
+                text: "<p>妳走進貝利的辦公室，發現她坐在她的辦公桌旁。她看著妳。「妳最好別浪費我的時間。」</p>",
+                options: [
+                    { text: "詢問關於峭壁街活動的事", nextScene: 13 }
+                ]
+            },
+            13: {
+                text: "<p>「是我出資的，但那又如何?」她看著妳。「都是妳上次多付的房租。」</p>",
+                options: [
+                    { text: "道謝", nextScene: 14 },
+                    { text: "離開", nextScene: 15 }
+                ]
+            },
+            14: {
+                text: "<p>「妳......妳真是不可理喻。」貝利似乎很驚訝妳會這樣回答。「別以為這樣就可以減免房租。」她說，「下周我要4,000。」</p>",
+                options: [
+                    { text: "離開辦公室(回到標題)", nextScene: 1 }
+                ]
+            },
+            15: {
+                text: "<p>「慢走不送。」貝利不再理會妳。</p>",
+                options: [
+                    { text: "離開辦公室(回到標題)", nextScene: 1 }
+                ]
+            },
+            16: {
+                text: "<p>妳與羅賓和孤兒院的孩子們度過了一個愉快的下午。</p>",
+                options: [
+                    { text: "回到標題", nextScene: 1 }
+                ]
+            },
+        };
+
+        // 加載場景函式
+        function loadScene(sceneNumber) {
+            const scene = scenes[sceneNumber];
+            const storyText = document.getElementById('story-text');
+            const options = document.getElementById('options');
+
+            // 更新文本
+            storyText.innerHTML = `<p>${scene.text}</p>`;
+
+            // 清空選項並加入新的
+            options.innerHTML = "";
+            scene.options.forEach((option, index) => {
+                const optionElement = document.createElement("span");
+                optionElement.className = "option";
+                optionElement.textContent = `${index + 1}) ${option.text}`;
+                optionElement.onclick = () => loadScene(option.nextScene);
+                options.appendChild(optionElement);
+            });
+
+            if (scene.onEnter) {
+                scene.onEnter();  // 確保onEnter函式被調用
+            }
+
+                // 如果 Pocky 狀態改變，更新顯示的內容
+            if (hasPocky && sceneNumber === 9) {
+                const pockyMessage = document.createElement('p');
+                pockyMessage.textContent = '妳現在擁有 Pocky!';
+                storyText.appendChild(pockyMessage);
+            }
+        }
+
+        // 開始遊戲
+        loadScene(1);
+    </script>
+</body>
+</html>
